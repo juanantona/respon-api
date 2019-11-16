@@ -18,3 +18,5 @@ router.get('/', async function(ctx) {
 app.use(router.routes()).use(router.allowedMethods());
 
 app.listen(3000);
+
+require('./mongo')(app);

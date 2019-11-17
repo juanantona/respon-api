@@ -1,8 +1,11 @@
 const MongoClient = require('mongodb').MongoClient;
-const MONGO_URL = 'mongodb://localhost:27017';
+const MONGODB_URI =
+  process.env.NODE_ENV === 'production'
+    ? process.env.MONGODB_URI
+    : 'mongodb://localhost:27017';
 
 module.exports = function(app) {
-  MongoClient.connect(MONGO_URL, { useUnifiedTopology: true })
+  MongoClient.connect(MONGODB_URI, { useUnifiedTopology: true })
     .then(connection => {
       const db = connection.db('respon');
       app.brothers = db.collection('brothers');

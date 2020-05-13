@@ -1,9 +1,13 @@
 const Koa = require('koa');
 const Router = require('koa-router');
 const BodyParser = require('koa-bodyparser');
+const cors = require('@koa/cors');
 
 const app = new Koa();
 const router = new Router();
+
+// Enable cors policy
+app.use(cors());
 
 // Use the bodyparser middlware
 app.use(BodyParser());

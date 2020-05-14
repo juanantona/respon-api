@@ -26,7 +26,8 @@ router.get('/brothers', async ctx => {
 
 // Create new brother
 router.post('/brothers', async ctx => {
-  ctx.body = await ctx.app.brothers.insert(ctx.request.body);
+  await ctx.app.brothers.insert(ctx.request.body);
+  ctx.body = await ctx.app.brothers.find().toArray();
 });
 
 const ObjectID = require('mongodb').ObjectID;

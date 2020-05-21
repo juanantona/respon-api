@@ -47,7 +47,8 @@ router.put('/brothers/:id', async ctx => {
 // Delete one
 router.delete('/brothers/:id', async ctx => {
   let documentQuery = { _id: ObjectID(ctx.params.id) };
-  ctx.body = await ctx.app.brothers.deleteOne(documentQuery);
+  await ctx.app.brothers.deleteOne(documentQuery);
+  ctx.body = await ctx.app.brothers.find().toArray();
 });
 
 app.use(router.routes()).use(router.allowedMethods());

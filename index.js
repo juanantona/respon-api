@@ -40,7 +40,8 @@ router.get('/brothers/:id', async ctx => {
 router.put('/brothers/:id', async ctx => {
   let documentQuery = { _id: ObjectID(ctx.params.id) };
   let valuesToUpdate = { $set: ctx.request.body };
-  ctx.body = await ctx.app.brothers.updateOne(documentQuery, valuesToUpdate);
+  await ctx.app.brothers.updateOne(documentQuery, valuesToUpdate);
+  ctx.body = await ctx.app.brothers.find().toArray();
 });
 
 // Delete one

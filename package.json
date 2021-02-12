@@ -18,6 +18,7 @@
   "homepage": "https://github.com/juanantona/respon-api#readme",
   "dependencies": {
     "@koa/cors": "^3.0.0",
+    "dotenv": "^8.2.0",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-logger": "^2.0.1",

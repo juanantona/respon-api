@@ -1,8 +1,7 @@
+require('dotenv').config();
+
 const MongoClient = require('mongodb').MongoClient;
-const MONGODB_URI =
-  process.env.NODE_ENV === 'production'
-    ? process.env.MONGODB_URI
-    : 'mongodb://localhost:27017';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 module.exports = function(app) {
   MongoClient.connect(MONGODB_URI, {

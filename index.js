@@ -1,28 +1,22 @@
 const Koa = require('koa');
-const Router = require('koa-router');
-const BodyParser = require('koa-bodyparser');
+const Router = require('@koa/router');
 const cors = require('@koa/cors');
+const koaBody = require('koa-body');
+const logger = require('koa-logger');
+const dbConnection = require('./mongo');
 
 const app = new Koa();
 const router = new Router();
 
-// Enable cors policy
 app.use(cors());
-
-// Use the bodyparser middlware
-app.use(BodyParser());
-
-const logger = require('koa-logger');
+app.use(koaBody());
 app.use(logger());
 
-router.get('/', async function(ctx) {
-  ctx.body = { message: 'Hello World!' };
+router.get('/', async ctx => {
+  ctx.body = { message: 'Respon API' };
 });
 
 // List all brothers
-router.get('/brothers', async ctx => {
-  ctx.body = await ctx.app.brothers.find().toArray();
-});
 
 // Create new brother
 router.post('/brothers', async ctx => {
@@ -51,8 +45,18 @@ router.delete('/brothers/:id', async ctx => {
   ctx.body = await ctx.app.brothers.find().toArray();
 });
 
-app.use(router.routes()).use(router.allowedMethods());
+const serverUp = async () => {
+  const db = await dbConnection();
+  const getBrothersController = async ctx => {
+    const brothers = await db
+      .collection('brothers')
+      .find()
+      .toArray();
+    ctx.body = brothers;
+  };
+  router.get('/brothers', getBrothersController);
+  app.use(router.routes(), router.allowedMethods());
+  app.listen(process.env.PORT || 3000);
+};
 
-app.listen(process.env.PORT || 3000);
-
-require('./mongo')(app);
+serverUp();

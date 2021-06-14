@@ -3,7 +3,7 @@ const Router = require('@koa/router');
 const cors = require('@koa/cors');
 const koaBody = require('koa-body');
 const logger = require('koa-logger');
-const dbConnection = require('./mongo');
+const Mongo = require('./mongo');
 
 const app = new Koa();
 const router = new Router();
@@ -17,6 +17,11 @@ router.get('/', async ctx => {
 });
 
 // List all brothers
+const getBrothersController = async ctx => {
+  const brothers = await Mongo.Brothers.getBrothers();
+  ctx.body = brothers;
+};
+router.get('/brothers', getBrothersController);
 
 // Create new brother
 router.post('/brothers', async ctx => {
@@ -45,17 +50,10 @@ router.delete('/brothers/:id', async ctx => {
   ctx.body = await ctx.app.brothers.find().toArray();
 });
 
+app.use(router.routes(), router.allowedMethods());
+
 const serverUp = async () => {
-  const db = await dbConnection();
-  const getBrothersController = async ctx => {
-    const brothers = await db
-      .collection('brothers')
-      .find()
-      .toArray();
-    ctx.body = brothers;
-  };
-  router.get('/brothers', getBrothersController);
-  app.use(router.routes(), router.allowedMethods());
+  await Mongo.init();
   app.listen(process.env.PORT || 3000);
 };
 

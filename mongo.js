@@ -1,19 +1,26 @@
+const Mongo = require('mongodb');
 require('dotenv').config();
 
-const MongoClient = require('mongodb').MongoClient;
-const MONGODB_URI = process.env.MONGODB_URI;
+const Brother = require('./Brothers');
 
-const dbConnection = async () => {
-  try {
-    const connection = await MongoClient.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
-    console.log('Database connection established');
-    return connection.db('respon');
-  } catch (error) {
-    console.error(error);
+class MongoConnection {
+  constructor() {
+    this.client = Mongo.MongoClient;
   }
-};
 
-module.exports = dbConnection;
+  async init() {
+    try {
+      this.connecttion = await this.client.connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+      console.log('Database connection established');
+    } catch (error) {
+      console.error(error);
+    }
+    this.db = this.connecttion.db('respon');
+    this.Brothers = new Brother(this.db);
+  }
+}
+
+module.exports = new MongoConnection();

@@ -1,58 +1,39 @@
 const Koa = require('koa');
-const Router = require('koa-router');
-const BodyParser = require('koa-bodyparser');
+const Router = require('@koa/router');
 const cors = require('@koa/cors');
+const koaBody = require('koa-body');
+const logger = require('koa-logger');
+const DB = require('./db');
 
 const app = new Koa();
 const router = new Router();
 
-// Enable cors policy
+// API prefix
+router.prefix(`/${process.env.API_VERSION}`);
+
+// API middlewares
 app.use(cors());
-
-// Use the bodyparser middlware
-app.use(BodyParser());
-
-const logger = require('koa-logger');
+app.use(koaBody());
 app.use(logger());
 
-router.get('/', async function(ctx) {
-  ctx.body = { message: 'Hello World!' };
+// API routes
+router.get('/', async ctx => {
+  ctx.body = { message: 'Respon API' };
 });
 
-// List all brothers
-router.get('/brothers', async ctx => {
-  ctx.body = await ctx.app.brothers.find().toArray();
-});
+const errorHandler = require('./app/middlewares/errorHandler');
+app.use(errorHandler);
 
-// Create new brother
-router.post('/brothers', async ctx => {
-  await ctx.app.brothers.insert(ctx.request.body);
-  ctx.body = await ctx.app.brothers.find().toArray();
-});
+const brother = require('./app/controllers/brother');
+router.get('/brothers', brother.getBrothers);
+router.get('/brothers/:id', brother.getOneBrother);
+router.post('/brothers', brother.createBrother);
+router.delete('/brothers/:id', brother.deleteOneBrother);
+router.put('/brothers/:id', brother.updateOneBrother);
 
-const ObjectID = require('mongodb').ObjectID;
-// Get one
-router.get('/brothers/:id', async ctx => {
-  ctx.body = await ctx.app.brothers.findOne({ _id: ObjectID(ctx.params.id) });
-});
+app.use(router.routes(), router.allowedMethods());
 
-// Update one
-router.put('/brothers/:id', async ctx => {
-  let documentQuery = { _id: ObjectID(ctx.params.id) };
-  let valuesToUpdate = { $set: ctx.request.body };
-  await ctx.app.brothers.updateOne(documentQuery, valuesToUpdate);
-  ctx.body = await ctx.app.brothers.find().toArray();
-});
-
-// Delete one
-router.delete('/brothers/:id', async ctx => {
-  let documentQuery = { _id: ObjectID(ctx.params.id) };
-  await ctx.app.brothers.deleteOne(documentQuery);
-  ctx.body = await ctx.app.brothers.find().toArray();
-});
-
-app.use(router.routes()).use(router.allowedMethods());
-
-app.listen(process.env.PORT || 3000);
-
-require('./mongo')(app);
+(async () => {
+  await DB();
+  app.listen(process.env.PORT || 3000);
+})();
